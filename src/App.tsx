@@ -3,28 +3,12 @@ import './App.css'
 
 const useStack = <T,>(initialStack: T[] = []) => {
   const [fullStack, setStack] = useState<T[]>(initialStack);
-  const [pointer, setPointer] = useState(fullStack.length);
+  const [pointer, { increment, decrement }] = useCount(fullStack.length);
 
   const add = (obj: T) => {
-    
-    setPointer(currentPointer => { 
-    
-      setStack(stack => {
-        const newStack = stack.slice(0, currentPointer)
-
-        return [...newStack, obj]
-      })
-
-      return currentPointer + 1
-    });
-  }
-
-  const undo = () => {
-    setPointer(n => n - 1);
-  }
-
-  const redo = () => {
-    setPointer(n => n + 1);
+    const newStack = stack.slice(0, pointer)
+    setStack([...newStack, obj])
+    increment();
   }
 
   const stack = fullStack.slice(0, pointer)
@@ -34,11 +18,25 @@ const useStack = <T,>(initialStack: T[] = []) => {
   return {
     stack,
     add,
-    undo,
-    redo,
+    undo: decrement,
+    redo: increment,
     canUndo,
     canRedo
   }
+}
+
+const useCount = (initialCount: number) => {
+  const [count, setCount] = useState(initialCount);
+
+  const increment = () => {
+    setCount(n => n + 1);
+  }
+
+  const decrement = () => {
+    setCount(n => n - 1);
+  }
+  
+  return [count, { increment, decrement }] as const
 }
 
 type Points = {
